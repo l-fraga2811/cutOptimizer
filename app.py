@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 from optimizer import optimize_cutting
 from visualizer import visualize_cutting_pattern
+from matplotlib.backends.backend_pdf import PdfPages
+import io
+import base64
 
 st.set_page_config(
     page_title="Material Cutting Optimizer",
@@ -188,6 +191,43 @@ with col2:
                         roll_width_cm, roll_length_cm, placements, unit
                     )
                     st.pyplot(fig)
+                    
+                    # Create PDF download button with custom styling
+                    pdf_buffer = io.BytesIO()
+                    with PdfPages(pdf_buffer) as pdf:
+                        pdf.savefig(fig)
+                    
+                    pdf_bytes = pdf_buffer.getvalue()
+                    b64_pdf = base64.b64encode(pdf_bytes).decode()
+                    
+                    # Create styled download button
+                    st.markdown(
+                        f"""
+                        <div style="text-align: center; margin: 20px 0;">
+                            <a href="data:application/pdf;base64,{b64_pdf}" 
+                               download="cutting_pattern.pdf"
+                               style="
+                                   text-decoration: none;
+                                   background-color: #0066cc;
+                                   color: white;
+                                   padding: 12px 20px;
+                                   border-radius: 5px;
+                                   font-weight: bold;
+                                   display: inline-flex;
+                                   align-items: center;
+                                   gap: 8px;
+                               ">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                Download Cutting Pattern (PDF)
+                            </a>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
                     
                     # Group identical pieces for more organized cutting instructions
                     from collections import defaultdict
